@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Large model artifacts under results/ (checkpoints, feature dumps) are already
+# covered by the global binary ignores below (*.h5 / *.pt / *.ckpt / *.npy).
+# The per-WSI attention-array cache is a ~1.16 GB JSON (not caught by those),
+# so ignore it explicitly; regenerate via scripts/06_extract_attention_maps.py.
+results/attention_extraction.json
+
+# WSI / large binary
+*.svs
+*.ndpi
+*.tif
+*.tiff
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+
+# Experiment trackers
+wandb/
+lightning_logs/
+mlruns/
+*.log
+
+# Experiment-code repository: publish ONLY the six final figures of the revised
+# manuscript and the per-WSI panels behind Figure 5 under paper/figures/.
+# Everything else under paper/ (manuscript, drafts, figure scripts and data,
+# earlier figure versions, backups) stays local under paper/archive/.
+paper/*
+!paper/figures/
+paper/figures/*
+!paper/figures/Figure_[1-6]_*.png
+paper/figures/*_org.png
+!paper/figures/panels/
+paper/figures/panels/*
+!paper/figures/panels/*.png
+docs/
+archive/
+review_*.md
+paperPlan_*.md
+CLAUDE-v1.md
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+
+# bkit runtime + per-session state (not portable across machines)
+.bkit/
+
+# Absolute-path symlinks created by scripts/00_link_v1_artifacts.sh.
+# These are user-specific and must be re-created per machine; do not commit.
+src/shared
+data/features
+data/graphs
+data/splits
+data/tiles
+
+# Intermediate and superseded figure outputs (only paper/figures/ is published)
+# and per-fold run configs kept locally.
+results/figures_rev1/
+results/test_eval/attention/fig5/
+results/deformable/fold_*/

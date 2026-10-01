@@ -1,0 +1,17 @@
+# Experiment 5 - Cross-species transfer learning (planning doc section 4.5)
+
+defaults:
+  - default
+
+experiment:
+  id: exp5_transfer
+  description: "Human (TCGA) -> canine (CATCH) transfer learning"
+  transfer_variants:
+    T1: {pretrain: none,          finetune: catch, mode: from_scratch}
+    T2: {pretrain: tcga_skcm,     finetune: catch, mode: full}
+    T3: {pretrain: tcga_multi,    finetune: catch, mode: full}
+    T4: {pretrain: tcga_multi,    finetune: catch, mode: full}
+    T5: {pretrain: tcga_multi,    finetune: catch, mode: linear_probe}
+  fixed:
+    graph.type: dual_edge
+    model.gnn.backbone: gat

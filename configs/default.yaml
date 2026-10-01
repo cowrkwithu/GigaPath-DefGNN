@@ -1,0 +1,162 @@
+# VetGigaGraph - Default configuration
+# Hyperparameters from VetGigaGraph_기획서.md (sections 3.2.1, 3.2.4, 3.2.5)
+
+project:
+  name: vetgigagraph
+  num_classes: 7
+  classes:
+    - MEL    # Melanoma
+    - MCT    # Mast Cell Tumor
+    - SCC    # Squamous Cell Carcinoma
+    - PNST   # Peripheral Nerve Sheath Tumor
+    - PLC    # Plasmacytoma
+    - TRB    # Trichoblastoma
+    - HIS    # Histiocytoma
+
+paths:
+  # External data — read-only CATCH dataset and project-wide output directory.
+  # Layout: /data/cancerImagingArchive/<class>/<class>_<id>_<slot>.svs (350 WSIs total)
+  raw: ${oc.env:VETGIGA_RAW_DIR,/data/cancerImagingArchive}
+  output_root: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}
+  # Outputs (subdirs of output_root)
+  tiles: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/tiles
+  features: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/features
+  graphs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/graphs
+  splits: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/splits
+  checkpoints: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/checkpoints
+  logs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/logs
+  figures: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/figures
+  tables: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/tables
+  wandb: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/wandb
+  smoke: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/smoke
+  # CATCH class-name → label-abbreviation mapping (raw dirname → tumor_class)
+  class_dir_to_label:
+    Melanoma: MEL
+    MCT: MCT
+    SCC: SCC
+    PNST: PNST
+    Plasmacytoma: PLC
+    Trichoblastoma: TRB
+    Histiocytoma: HIS
+  # File-name pattern to extract patient_id from /data/cancerImagingArchive
+  # Pattern: <ClassDir>_<PatientID>_<SlotIdx>.svs  (e.g. Melanoma_01_1.svs → patient "01", slot "1")
+  slide_filename_regex: '^(?P<class>[A-Za-z]+)_(?P<patient>\d+)_(?P<slot>\d+)\.svs$'
+
+preprocessing:
+  tile_size: 256
+  stride: 256
+  magnification: 40                  # 0.25 um/pixel
+  tissue_threshold: 0.5              # tissue ratio per tile
+  blur_threshold: 100                # Laplacian variance lower bound
+  stain_normalization: macenko       # macenko | none
+  min_tiles_per_slide: 16            # below this -> InsufficientTilesError (no silent zero-padding)
+  max_tiles_per_slide: null          # null = no cap
+
+feature_extraction:
+  model: hf_hub:prov-gigapath/prov-gigapath
+  embedding_dim: 1536
+  batch_size: 256
+  num_workers: 8
+  freeze_encoder: true
+  output_format: hdf5
+
+graph:
+  type: dual_edge                    # spatial_knn | feature_sim | dual_edge | hierarchical | heterogeneous
+  spatial:
+    k: 8
+    edge_weight: inverse_distance
+  feature:
+    similarity: cosine
+    threshold: 0.8                   # tau in {0.7, 0.8, 0.9}
+    k: 5
+    max_edges_per_node: 8            # D-19 fix: per-row top-K cap. K=8 chosen for train-time
+                                     # GPU memory safety (K=64 produced 5× more edges than
+                                     # dual_edge, causing GAT backward OOM at ~18 GiB/24 GiB).
+                                     # K=8 matches dual_edge's feature_k=5 order of magnitude,
+                                     # keeping train memory profile in line with the proven-
+                                     # working sweep. null = legacy unbounded (build-time OOM).
+  hierarchical:
+    levels: 2
+    pool: diffpool                   # diffpool | mincutpool
+  heterogeneous:
+    node_types: [tumor, stroma, inflammation]
+
+model:
+  name: vetgigagraph                 # vetgigagraph | abmil | dsmil | transmil | clam_sb | clam_mb | gigapath_slide
+  gnn:
+    # WORKAROUND (D-8 jr): full-spec GAT (h=512 heads=8 layers=3 per
+    # 04-experiment-design.md Locked Defaults) requires either a >24 GiB
+    # GPU or sparse attention. The values below are what fits on a single
+    # RTX 3090 with gradient checkpointing. Restore the full spec when
+    # D-8 jr lands (GATv2 sparse / subsampling / multi-GPU). See
+    # docs/03-analysis/vetgigagraph.analysis.md v0.4 D-7 / D-8.
+    backbone: gat                    # gcn | gat | graphsage | gin
+    layers: 2                        # spec=3 (Exp1 Locked Default)
+    hidden_dim: 128                  # spec=512 (Exp1 Locked Default)
+    output_dim: 128                  # spec=256 (Exp1 Locked Default)
+    heads: 2                         # spec=8  (Exp1 Locked Default)
+    dropout: 0.25
+    gradient_checkpointing: true     # GAT [E,H,hidden] message tensor recompute. Required for >50k-node WSIs on 24 GiB GPUs.
+  slide_encoder:
+    enabled: true
+    frozen: true                     # WORKAROUND (D-18): mandatory on 24 GiB GPU. Trainable slide encoder peaks ~21.76 GiB → OOM. Restore to false on >24 GiB hardware. See docs/02-design/05-software-architecture.md §2.2 + slide-encoder-injection µPDCA analysis D-18.
+    embed_dim: 768                   # LongNet ``gigapath_slide_enc12l768d`` output dim (slide-level embedding). Not the tile-encoder 1536. See slide-encoder-injection µPDCA design §1.3.
+    proj_dim: 256
+  fusion:
+    # WORKAROUND (D-7/D-8): set to gnn_only as the documented Phase-12
+    # fallback (vetgigagraph.do.md §Phase 12 line 308). Restore to
+    # learnable_weighted (Exp1 spec) when the sibling micro-PDCA
+    # `slide-encoder-injection` lands the GigaPath slide_backbone_loader.
+    strategy: gnn_only               # gnn_only | slide_only | concat | learnable_weighted | cross_attention | gated
+    init_alpha: 0.5
+  classifier:
+    hidden_dim: 128
+    dropout: 0.25
+
+training:
+  optimizer: adamw
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  scheduler: cosine_warm_restarts
+  warmup_epochs: 5
+  max_epochs: 100
+  batch_size: 1                      # WSI = 1 graph per batch
+  accumulation_steps: 8
+  gradient_clip_val: 1.0
+  mixed_precision: true              # fp16 / bf16
+  loss: cross_entropy
+  class_weights: inverse_frequency
+  early_stopping:
+    monitor: val_balanced_accuracy
+    mode: max
+    patience: 15
+
+cross_validation:
+  num_folds: 5
+  seeds: [42, 123, 456, 789, 1024]
+  split_strategy: patient_level
+
+evaluation:
+  metrics:
+    - balanced_accuracy
+    - weighted_f1
+    - macro_auroc
+    - per_class_accuracy
+    - cohen_kappa
+  primary_metric: balanced_accuracy
+  statistical_tests:
+    - paired_ttest
+    - wilcoxon
+    - mcnemar
+  significance_level: 0.05
+  bonferroni: true
+
+logging:
+  framework: wandb
+  project: vetgigagraph
+  log_every_n_steps: 10
+  save_top_k: 3
+
+reproducibility:
+  deterministic: true
+  benchmark: false

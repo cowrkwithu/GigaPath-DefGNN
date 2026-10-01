@@ -1,0 +1,12 @@
+{
+  "model": "v1_production_gat_dual_edge",
+  "fold": 1,
+  "seed": 123,
+  "val": {
+    "val_loss": 0.010586557909846306,
+    "val_balanced_accuracy": 1.0,
+    "val_weighted_f1": 1.0
+  },
+  "train_loss": 0.004129662644118071,
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp2/dual_edge/vetgigagraph/fold_1_metrics.json"
+}

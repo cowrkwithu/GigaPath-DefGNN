@@ -1,0 +1,18 @@
+# Experiment 4 - Fusion strategy comparison (planning doc section 4.4)
+
+defaults:
+  - default
+
+experiment:
+  id: exp4_fusion
+  description: "GNN + Slide Encoder fusion strategies"
+  fusion_variants:
+    F1: gnn_only
+    F2: slide_only
+    F3: concat
+    F4: learnable_weighted
+    F5: cross_attention
+    F6: gated
+  fixed:
+    graph.type: dual_edge
+    model.gnn.backbone: gat

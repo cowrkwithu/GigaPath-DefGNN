@@ -1,0 +1,26 @@
+# Experiment 2 - Graph structure ablation (planning doc section 4.2)
+
+defaults:
+  - default
+
+experiment:
+  id: exp2_graph_ablation
+  description: "5 graph variants using GAT backbone"
+  graph_variants:
+    G1:
+      type: spatial_knn
+      params: {k: 8}
+    G2:
+      type: feature_sim
+      params: {threshold: 0.8}
+    G3:
+      type: dual_edge
+      params: {spatial_k: 8, feature_k: 5}
+    G4:
+      type: hierarchical
+      params: {levels: 2, pool: diffpool}
+    G5:
+      type: heterogeneous
+      params: {node_types: [tumor, stroma, inflammation]}
+  fixed:
+    model.gnn.backbone: gat

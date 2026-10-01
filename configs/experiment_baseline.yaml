@@ -1,0 +1,19 @@
+# Experiment 1 - Baseline comparison (planning doc section 4.1)
+# Compare GigaPath + GNN against MIL baselines using identical tile embeddings
+
+defaults:
+  - default
+
+experiment:
+  id: exp1_baseline
+  description: "Slide-level aggregation methods on identical GigaPath embeddings"
+  models:
+    - abmil
+    - dsmil
+    - transmil
+    - clam_sb
+    - clam_mb
+    - gigapath_slide
+    - vetgigagraph    # ours: GigaPath + GAT Dual-Edge Hybrid
+  cross_validation:
+    enabled: true

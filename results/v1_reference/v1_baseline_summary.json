@@ -1,0 +1,40 @@
+{
+  "model": "v1_production_gat_dual_edge",
+  "n_folds": 5,
+  "metrics": {
+    "val_loss": {
+      "mean": 0.12599167376756668,
+      "std": 0.173720800097285,
+      "fold_values": [
+        0.017691319808363914,
+        0.010586557909846306,
+        0.07911785691976547,
+        0.05266259238123894,
+        0.4699000418186188
+      ]
+    },
+    "val_balanced_accuracy": {
+      "mean": 0.9792517185211181,
+      "std": 0.021789957135465894,
+      "fold_values": [
+        1.0,
+        1.0,
+        0.9761905670166016,
+        0.9795918464660645,
+        0.9404761791229248
+      ]
+    },
+    "val_weighted_f1": {
+      "mean": 0.9737802982330322,
+      "std": 0.02890514389189519,
+      "fold_values": [
+        1.0,
+        1.0,
+        0.9746180176734924,
+        0.9734349250793457,
+        0.920848548412323
+      ]
+    }
+  },
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp2/dual_edge/vetgigagraph + $VETGIGA_OUTPUT_DIR/tables/_paper_saturation_summary.csv"
+}

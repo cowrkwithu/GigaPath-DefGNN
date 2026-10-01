@@ -1,0 +1,51 @@
+experiment:
+  id: v2_deformable
+  description: 'Deformable-attention GNN on frozen Prov-GigaPath features (CATCH).
+
+    Sits in v1''s GAT slot. Coord-aware bilinear sampling per Fu 2025
+
+    (arXiv:2508.05382), K=2 sampling offsets, otherwise matches v1 GAT
+
+    capacity for fair comparison.
+
+
+    1st revision: knn_chunk_size 1024 -> 16384 (performance only; neighbours identical,
+    fp32 max diff 9.5e-7).
+
+    '
+model:
+  name: vetgigagraph_deformable
+  gnn:
+    backbone: deformable_attention
+    layers: 2
+    hidden_dim: 128
+    output_dim: 128
+    heads: 2
+    dropout: 0.25
+    gradient_checkpointing: true
+    deformable:
+      num_offsets: 2
+      offset_mlp_depth: 1
+      offset_mlp_hidden: 64
+      offset_init_scale: 0.05
+      offset_penalty_weight: 0.0001
+      offset_penalty_epochs: 20
+      coord_normalization: per_wsi_unit
+      sampling_mode: bilinear
+      fp32_offset_mlp: true
+      knn_k: 8
+      knn_temperature: 1.0
+      knn_chunk_size: 16384
+logging:
+  framework: wandb
+  project: vetgigagraph_v2
+  tags:
+  - v2
+  - deformable_attention
+  - fu2025
+  - vs_v1_gat
+  save_top_k: 3
+paths:
+  checkpoints: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/checkpoints_v2_deformable
+  logs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/logs_v2_deformable
+  wandb: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/wandb_v2_deformable

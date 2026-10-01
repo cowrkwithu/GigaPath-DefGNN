@@ -1,0 +1,12 @@
+{
+  "model": "v1_dsmil",
+  "fold": 1,
+  "seed": 123,
+  "val": {
+    "val_loss": 0.04404295235872269,
+    "val_balanced_accuracy": 0.9795918464660645,
+    "val_weighted_f1": 0.9742275476455688
+  },
+  "train_loss": 0.0009380104020237923,
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp1/dsmil/fold_1_metrics.json"
+}

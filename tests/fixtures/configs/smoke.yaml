@@ -1,0 +1,149 @@
+# Smoke fixture config (Phase 11.2)
+#
+# Tiny dimensions, 1-epoch training, batch_size=1 — exercises the full
+# pipeline (dataset → model → trainer → metrics → verifier) end-to-end
+# in < 5 min on CPU.
+#
+# Used by:
+#   - tests/integration/test_smoke_pipeline.py
+#   - scripts/smoke_test.sh
+
+project:
+  name: vetgigagraph_smoke
+  num_classes: 7
+  classes:
+    - MEL
+    - MCT
+    - SCC
+    - PNST
+    - PLC
+    - TRB
+    - HIS
+
+paths:
+  # Smoke fixtures live under tmp_path during tests; these defaults
+  # are overridden by --splits-csv / --graphs-root flags.
+  raw: /tmp/vetgigagraph_smoke/raw
+  output_root: /tmp/vetgigagraph_smoke/out
+  tiles: /tmp/vetgigagraph_smoke/out/tiles
+  features: /tmp/vetgigagraph_smoke/out/features
+  graphs: /tmp/vetgigagraph_smoke/out/graphs
+  splits: /tmp/vetgigagraph_smoke/out/splits
+  checkpoints: /tmp/vetgigagraph_smoke/out/checkpoints
+  logs: /tmp/vetgigagraph_smoke/out/logs
+  figures: /tmp/vetgigagraph_smoke/out/figures
+  tables: /tmp/vetgigagraph_smoke/out/tables
+  wandb: /tmp/vetgigagraph_smoke/out/wandb
+  smoke: /tmp/vetgigagraph_smoke/out/smoke
+  class_dir_to_label:
+    Melanoma: MEL
+    MCT: MCT
+    SCC: SCC
+    PNST: PNST
+    Plasmacytoma: PLC
+    Trichoblastoma: TRB
+    Histiocytoma: HIS
+  slide_filename_regex: '^(?P<class>[A-Za-z]+)_(?P<patient>\d+)_(?P<slot>\d+)\.svs$'
+
+preprocessing:
+  tile_size: 256
+  stride: 256
+  magnification: 40
+  tissue_threshold: 0.5
+  blur_threshold: 100
+  stain_normalization: none           # smoke skips Macenko (faster)
+  min_tiles_per_slide: 4              # tiny — smoke graphs have ~16 tiles
+  max_tiles_per_slide: null
+
+# Locked: embedding_dim must be 1536 (GigaPath default, enforced by
+# src.utils.config invariants). Smoke graphs are random toy embeddings
+# at this dim — tiny by parameter count (70 slides × ~25 tiles each).
+feature_extraction:
+  model: prov-gigapath/prov-gigapath
+  embedding_dim: 1536
+  batch_size: 4
+  num_workers: 0
+  freeze_encoder: true
+  output_format: hdf5
+
+graph:
+  type: spatial_knn                    # simplest variant for smoke
+  spatial:
+    k: 4
+    edge_weight: inverse_distance
+  feature:
+    similarity: cosine
+    threshold: 0.5
+    k: 3
+  hierarchical:
+    levels: 2
+    pool: diffpool
+  heterogeneous:
+    node_types: [tumor, stroma, inflammation]
+
+model:
+  name: abmil                          # smoke uses ABMIL — small + fast
+  gnn:
+    backbone: gat
+    layers: 2
+    hidden_dim: 64
+    output_dim: 32
+    heads: 2
+    dropout: 0.0
+  slide_encoder:
+    enabled: false                     # smoke skips GigaPath slide encoder
+    frozen: false
+    proj_dim: 32
+  fusion:
+    strategy: gnn_only                 # bypass slide encoder
+    init_alpha: 0.5
+  classifier:
+    hidden_dim: 32
+    dropout: 0.0
+
+training:
+  optimizer: adamw
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-5
+  scheduler: cosine_warm_restarts
+  warmup_epochs: 0
+  max_epochs: 1
+  batch_size: 1
+  accumulation_steps: 1
+  gradient_clip_val: 1.0
+  mixed_precision: false               # CPU smoke — no fp16
+  loss: cross_entropy
+  class_weights: inverse_frequency
+  early_stopping:
+    monitor: val_balanced_accuracy
+    mode: max
+    patience: 0
+
+cross_validation:
+  num_folds: 5
+  seeds: [42, 123, 456, 789, 1024]     # locked, but smoke only uses fold 0
+  split_strategy: patient_level
+
+evaluation:
+  metrics:
+    - balanced_accuracy
+    - weighted_f1
+    - macro_auroc
+    - per_class_accuracy
+    - cohen_kappa
+  primary_metric: balanced_accuracy
+  statistical_tests:
+    - paired_ttest
+    - wilcoxon
+  significance_level: 0.05
+  bonferroni: false
+
+logging:
+  framework: wandb
+  project: vetgigagraph_smoke
+  log_every_n_steps: 1
+  save_top_k: 1
+
+reproducibility:
+  deterministic: false                 # GAT path can require non-deterministic ops
+  benchmark: false

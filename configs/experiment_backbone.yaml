@@ -1,0 +1,17 @@
+# Experiment 3 - GNN backbone comparison (planning doc section 4.3)
+# Fixed graph: Dual-Edge Hybrid
+
+defaults:
+  - default
+
+experiment:
+  id: exp3_backbone
+  description: "GNN backbone comparison on Dual-Edge Hybrid graph"
+  backbones:
+    B1: {backbone: gcn,        heads: null}
+    B2: {backbone: gat,        heads: 4}
+    B3: {backbone: gat,        heads: 8}
+    B4: {backbone: graphsage,  heads: null}
+    B5: {backbone: gin,        heads: null}
+  fixed:
+    graph.type: dual_edge

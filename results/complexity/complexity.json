@@ -1,0 +1,200 @@
+{
+ "wsis": {
+  "median": {
+   "slide_id": "MCT_42_1",
+   "tiles": 26126,
+   "edges": 679276
+  },
+  "largest": {
+   "slide_id": "TRB_10_3",
+   "tiles": 93973,
+   "edges": 2443298
+  }
+ },
+ "encoder_params": 1134953984,
+ "gpu": "NVIDIA GeForce RTX 3090",
+ "models": {
+  "gcn": {
+   "params": 230792,
+   "median": {
+    "gflops": 11.1359808,
+    "latency_ms": 6.2454999424517155,
+    "peak_mem_mib": 564.99609375
+   },
+   "largest": {
+    "gflops": 40.05508608,
+    "latency_ms": 23.457229835912585,
+    "peak_mem_mib": 2031.1884765625
+   }
+  },
+  "gin": {
+   "params": 263818,
+   "median": {
+    "gflops": 12.848174336,
+    "latency_ms": 19.02782404795289,
+    "peak_mem_mib": 4133.21484375
+   },
+   "largest": {
+    "gflops": 46.213700608,
+    "latency_ms": 72.75866810232401,
+    "peak_mem_mib": 14866.822265625
+   }
+  },
+  "graphsage": {
+   "params": 443784,
+   "median": {
+    "gflops": 22.265238784,
+    "latency_ms": 19.85987601801753,
+    "peak_mem_mib": 4286.39697265625
+   },
+   "largest": {
+    "gflops": 80.086080512,
+    "latency_ms": 75.7121299393475,
+    "peak_mem_mib": 15417.80419921875
+   }
+  },
+  "gat": {
+   "params": 444808,
+   "median": {
+    "gflops": 22.265238784,
+    "latency_ms": 10.920070810243487,
+    "peak_mem_mib": 1117.833984375
+   },
+   "largest": {
+    "gflops": 80.086080512,
+    "latency_ms": 52.87474114447832,
+    "peak_mem_mib": 4018.64111328125
+   }
+  },
+  "abmil": {
+   "params": 527112,
+   "median": {
+    "gflops": 27.408476672,
+    "latency_ms": 1.0948448907583952,
+    "peak_mem_mib": 90.49951171875
+   },
+   "largest": {
+    "gflops": 98.585950208,
+    "latency_ms": 3.403971903026104,
+    "peak_mem_mib": 321.947265625
+   }
+  },
+  "dsmil": {
+   "params": 495758,
+   "median": {
+    "gflops": 25.917454336,
+    "latency_ms": 0.9715750347822905,
+    "peak_mem_mib": 90.04833984375
+   },
+   "largest": {
+    "gflops": 93.221678336,
+    "latency_ms": 2.7531140949577093,
+    "peak_mem_mib": 321.947265625
+   }
+  },
+  "transmil": {
+   "params": 1975047,
+   "median": {
+    "gflops": 1500.740785664,
+    "latency_ms": 25.200529024004936,
+    "peak_mem_mib": 194.6181640625
+   },
+   "largest": {
+    "gflops": 18455.63878144,
+    "latency_ms": 297.95000702142715,
+    "peak_mem_mib": 691.54443359375
+   }
+  },
+  "clam_sb": {
+   "params": 527112,
+   "median": {
+    "gflops": 27.408476672,
+    "latency_ms": 1.1023348197340965,
+    "peak_mem_mib": 90.49951171875
+   },
+   "largest": {
+    "gflops": 98.585950208,
+    "latency_ms": 3.414004109799862,
+    "peak_mem_mib": 321.947265625
+   }
+  },
+  "clam_mb": {
+   "params": 528654,
+   "median": {
+    "gflops": 27.488735744,
+    "latency_ms": 1.7194680403918028,
+    "peak_mem_mib": 255.18798828125
+   },
+   "largest": {
+    "gflops": 98.874635264,
+    "latency_ms": 5.528223933652043,
+    "peak_mem_mib": 772.30126953125
+   }
+  },
+  "acmil": {
+   "params": 470447,
+   "median": {
+    "gflops": 24.08443136,
+    "latency_ms": 0.9125848300755024,
+    "peak_mem_mib": 90.0478515625
+   },
+   "largest": {
+    "gflops": 86.629595392,
+    "latency_ms": 2.8539448976516724,
+    "peak_mem_mib": 321.94677734375
+   }
+  },
+  "wikg": {
+   "params": 691976,
+   "median": {
+    "gflops": 385.437508608,
+    "latency_ms": 21.86984196305275,
+    "peak_mem_mib": 450.66259765625
+   },
+   "largest": {
+    "gflops": 4650.788427008,
+    "latency_ms": 259.6267119515687,
+    "peak_mem_mib": 1613.9072265625
+   }
+  },
+  "defgnn": {
+   "params": 1319456,
+   "median": {
+    "gflops": 90.594134144,
+    "latency_ms": 207.3055380024016,
+    "peak_mem_mib": 2711.5732421875
+   },
+   "largest": {
+    "gflops": 325.859305792,
+    "latency_ms": 1517.5732898060232,
+    "peak_mem_mib": 4241.66552734375
+   }
+  },
+  "clam_sb_inst": {
+   "params": 530710,
+   "median": {
+    "gflops": 27.408476672,
+    "latency_ms": 1.0872881393879652,
+    "peak_mem_mib": 90.04833984375
+   },
+   "largest": {
+    "gflops": 98.585950208,
+    "latency_ms": 3.379527013748884,
+    "peak_mem_mib": 321.947265625
+   }
+  },
+  "clam_mb_inst": {
+   "params": 532252,
+   "median": {
+    "gflops": 27.488735744,
+    "latency_ms": 1.6938738990575075,
+    "peak_mem_mib": 228.9765625
+   },
+   "largest": {
+    "gflops": 98.874635264,
+    "latency_ms": 5.547576118260622,
+    "peak_mem_mib": 678.02099609375
+   }
+  }
+ }
+}

@@ -1,0 +1,10 @@
+{
+  "model": "vetgigagraph_v2_deformable",
+  "fold": 3,
+  "seed": 789,
+  "val": {
+    "val_loss": 0.14682254195213318,
+    "val_balanced_accuracy": 1.0,
+    "val_weighted_f1": 1.0
+  }
+}

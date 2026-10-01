@@ -1,0 +1,3 @@
+# WiKG port vs official implementation (github.com/WonderLandxD/WiKG @ eb3144f), eval mode, same weights
+N=5000 tiles, seed 0: max |logit difference| = 1.73e-06
+N=20000 tiles, seed 1: max |logit difference| = 3.64e-06

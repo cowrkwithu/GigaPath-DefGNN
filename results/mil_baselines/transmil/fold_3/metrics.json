@@ -1,0 +1,12 @@
+{
+  "model": "v1_transmil",
+  "fold": 3,
+  "seed": 789,
+  "val": {
+    "val_loss": 0.4257494807243347,
+    "val_balanced_accuracy": 0.9166667461395264,
+    "val_weighted_f1": 0.9209384918212891
+  },
+  "train_loss": 0.0003629922866821289,
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp1/transmil/fold_3_metrics.json"
+}

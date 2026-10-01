@@ -1,0 +1,27 @@
+# Thumbnail prefilter validation (2026-09-27), completed 20x slides without prefilter
+## max-saturation rule
+55 slides, 985,199 grid cells, 227,026 kept tiles
+skip if thumbnail max saturation <  3: cells skipped   0.5% | kept tiles that would be lost: 0
+skip if thumbnail max saturation <  5: cells skipped   2.0% | kept tiles that would be lost: 0
+skip if thumbnail max saturation <  8: cells skipped   7.0% | kept tiles that would be lost: 0
+skip if thumbnail max saturation < 10: cells skipped  10.2% | kept tiles that would be lost: 0
+
+[exited with code 0]
+## tissue-fraction rule (adopted: 0.01)
+57 slides, 1,066,625 cells, 261,228 kept; lowest thumbnail tissue fraction among kept tiles: 0.513
+skip if thumbnail tissue fraction < 0.01: cells skipped  49.5% | kept tiles lost: 0
+skip if thumbnail tissue fraction < 0.02: cells skipped  50.3% | kept tiles lost: 0
+skip if thumbnail tissue fraction < 0.05: cells skipped  51.4% | kept tiles lost: 0
+skip if thumbnail tissue fraction < 0.10: cells skipped  52.3% | kept tiles lost: 0
+skip if thumbnail tissue fraction < 0.20: cells skipped  53.7% | kept tiles lost: 0
+
+[exited with code 0]
+## bit-identity re-tiling check
+2026-09-27T00:49:55 [INFO] src.preprocessing.wsi_tiler :: Tiled HIS_05_1: kept 1896 tiles → /data/cia_outputs/_prefilter_equiv_test/HIS_05_1
+HIS_05_1 wall 608.17 s
+2026-09-27T01:09:52 [INFO] src.preprocessing.wsi_tiler :: Tiled MCT_02_2: kept 6336 tiles → /data/cia_outputs/_prefilter_equiv_test/MCT_02_2
+MCT_02_2 wall 1197.51 s
+HIS_05_1: tiles 1896 vs 1896 | coords.csv identical: True | PNG names identical: True | PNGs with different bytes: 0 | cells skipped by prefilter: 5839
+MCT_02_2: tiles 6336 vs 6336 | coords.csv identical: True | PNG names identical: True | PNGs with different bytes: 0 | cells skipped by prefilter: 14775
+
+[exited with code 0]

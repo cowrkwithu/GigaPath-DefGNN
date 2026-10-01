@@ -1,0 +1,12 @@
+{
+  "model": "v1_clam_mb",
+  "fold": 0,
+  "seed": 42,
+  "val": {
+    "val_loss": 0.06255440413951874,
+    "val_balanced_accuracy": 0.9795918464660645,
+    "val_weighted_f1": 0.9731619358062744
+  },
+  "train_loss": 0.0030441589187830687,
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp1/clam_mb/fold_0_metrics.json"
+}

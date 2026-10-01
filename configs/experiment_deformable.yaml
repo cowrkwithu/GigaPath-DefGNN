@@ -1,0 +1,73 @@
+# v2 experiment — deformable-attention GNN baseline (Fu et al. 2025)
+#
+# This is a PURE OVERRIDES file. v2's `scripts/04b_train_deformable.py` loads
+# pw-vetGigagraph/configs/default.yaml first, then merges this file on top via
+# OmegaConf.merge. v1's load_config does not support Hydra-style `defaults:`
+# composition, so we do the merge ourselves.
+#
+# Only blocks below override the v1 default; every unmentioned key is
+# inherited (dataset, splits, graph, optimizer, scheduler, loss, CV protocol,
+# evaluation) so the v1 vs v2 comparison is statistically valid.
+#
+# See docs/02-design-v2.md for the design rationale and risk register.
+
+experiment:
+  id: v2_deformable
+  description: |
+    Deformable-attention GNN on frozen Prov-GigaPath features (CATCH).
+    Sits in v1's GAT slot. Coord-aware bilinear sampling per Fu 2025
+    (arXiv:2508.05382), K=2 sampling offsets, otherwise matches v1 GAT
+    capacity for fair comparison.
+
+# ─── Model override ────────────────────────────────────────────────────────
+model:
+  name: vetgigagraph_deformable
+  gnn:
+    backbone: deformable_attention      # NEW — registered in src/deformable_attention/
+    layers: 2                            # match v1 GAT
+    hidden_dim: 128                      # match v1 GAT
+    output_dim: 128                      # match v1 GAT
+    heads: 2                             # match v1 GAT
+    dropout: 0.25                        # match v1
+    gradient_checkpointing: true
+    # Deformable-attention specific
+    deformable:
+      num_offsets: 2                     # K — reduced from Fu 2025 default (4) to fit
+                                          # 50k-tile WSIs on a 24 GiB GPU. The
+                                          # [chunk, K, N, 2] broadcast in the soft-KNN
+                                          # kernel scales as K; halving K halves peak.
+      offset_mlp_depth: 1                # 1 hidden layer, ReLU
+      offset_mlp_hidden: 64
+      offset_init_scale: 0.05
+      offset_penalty_weight: 1.0e-4
+      offset_penalty_epochs: 20
+      coord_normalization: per_wsi_unit
+      sampling_mode: bilinear
+      fp32_offset_mlp: true
+      knn_k: 8
+      knn_temperature: 1.0
+      knn_chunk_size: 1024               # query-chunk for the soft-KNN kernel.
+                                          # With torch_cluster.knn we now scale
+                                          # at O(c*knn_k*D) not O(c*N). 1024 keeps
+                                          # peak feats tensor at ~48 MB.
+
+# ─── Fusion / classifier inherit v1 defaults (no override) ─────────────────
+# fusion: gnn_only (v1 production)
+# classifier: hidden_dim=128, dropout=0.25
+
+# ─── Logging override ──────────────────────────────────────────────────────
+logging:
+  framework: wandb
+  project: vetgigagraph_v2
+  tags:
+    - v2
+    - deformable_attention
+    - fu2025
+    - vs_v1_gat
+  save_top_k: 3
+
+# ─── Output path override (v2-isolated) ────────────────────────────────────
+paths:
+  checkpoints: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/checkpoints_v2_deformable
+  logs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/logs_v2_deformable
+  wandb: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/wandb_v2_deformable

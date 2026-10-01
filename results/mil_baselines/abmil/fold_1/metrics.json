@@ -1,0 +1,12 @@
+{
+  "model": "v1_abmil",
+  "fold": 1,
+  "seed": 123,
+  "val": {
+    "val_loss": 0.016826514154672623,
+    "val_balanced_accuracy": 1.0,
+    "val_weighted_f1": 1.0
+  },
+  "train_loss": 0.00208811042830348,
+  "source": "$VETGIGA_OUTPUT_DIR/checkpoints/exp1/abmil/fold_1_metrics.json"
+}

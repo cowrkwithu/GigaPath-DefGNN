@@ -1,0 +1,136 @@
+project:
+  name: vetgigagraph
+  num_classes: 7
+  classes:
+  - MEL
+  - MCT
+  - SCC
+  - PNST
+  - PLC
+  - TRB
+  - HIS
+paths:
+  raw: ${oc.env:VETGIGA_RAW_DIR,/data/cancerImagingArchive}
+  output_root: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}
+  tiles: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/tiles
+  features: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/features
+  graphs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/graphs
+  splits: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/splits
+  checkpoints: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/checkpoints
+  logs: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/logs
+  figures: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/figures
+  tables: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/tables
+  wandb: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/wandb
+  smoke: ${oc.env:VETGIGA_OUTPUT_DIR,/data/cia_outputs}/smoke
+  class_dir_to_label:
+    Melanoma: MEL
+    MCT: MCT
+    SCC: SCC
+    PNST: PNST
+    Plasmacytoma: PLC
+    Trichoblastoma: TRB
+    Histiocytoma: HIS
+  slide_filename_regex: ^(?P<class>[A-Za-z]+)_(?P<patient>\d+)_(?P<slot>\d+)\.svs$
+preprocessing:
+  tile_size: 256
+  stride: 256
+  magnification: 40
+  tissue_threshold: 0.5
+  blur_threshold: 100
+  stain_normalization: macenko
+  min_tiles_per_slide: 16
+  max_tiles_per_slide: null
+feature_extraction:
+  model: hf_hub:prov-gigapath/prov-gigapath
+  embedding_dim: 1536
+  batch_size: 256
+  num_workers: 8
+  freeze_encoder: true
+  output_format: hdf5
+graph:
+  type: dual_edge
+  spatial:
+    k: 8
+    edge_weight: inverse_distance
+  feature:
+    similarity: cosine
+    threshold: 0.8
+    k: 5
+    max_edges_per_node: 8
+  hierarchical:
+    levels: 2
+    pool: diffpool
+  heterogeneous:
+    node_types:
+    - tumor
+    - stroma
+    - inflammation
+model:
+  name: vetgigagraph
+  gnn:
+    backbone: gin
+    layers: 2
+    hidden_dim: 128
+    output_dim: 128
+    heads: 2
+    dropout: 0.25
+    gradient_checkpointing: true
+  slide_encoder:
+    enabled: true
+    frozen: true
+    embed_dim: 768
+    proj_dim: 256
+  fusion:
+    strategy: gnn_only
+    init_alpha: 0.5
+  classifier:
+    hidden_dim: 128
+    dropout: 0.25
+training:
+  optimizer: adamw
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  scheduler: cosine_warm_restarts
+  warmup_epochs: 5
+  max_epochs: 100
+  batch_size: 1
+  accumulation_steps: 8
+  gradient_clip_val: 1.0
+  mixed_precision: true
+  loss: cross_entropy
+  class_weights: inverse_frequency
+  early_stopping:
+    monitor: val_balanced_accuracy
+    mode: max
+    patience: 15
+cross_validation:
+  num_folds: 5
+  seeds:
+  - 42
+  - 123
+  - 456
+  - 789
+  - 1024
+  split_strategy: patient_level
+evaluation:
+  metrics:
+  - balanced_accuracy
+  - weighted_f1
+  - macro_auroc
+  - per_class_accuracy
+  - cohen_kappa
+  primary_metric: balanced_accuracy
+  statistical_tests:
+  - paired_ttest
+  - wilcoxon
+  - mcnemar
+  significance_level: 0.05
+  bonferroni: true
+logging:
+  framework: wandb
+  project: vetgigagraph
+  log_every_n_steps: 10
+  save_top_k: 3
+reproducibility:
+  deterministic: true
+  benchmark: false
